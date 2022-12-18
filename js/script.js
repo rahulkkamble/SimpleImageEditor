@@ -12,19 +12,34 @@ const fileInput = document.querySelector(".file-input"),
 
 let brightness = 100, saturation = 100, inversion = 0, grayscale = 0;
 let rotate = 0, flipHorizontal = 1, flipVertical = 1;
+let savedImage = true;
 
 const applyFilter = () => {
     previewImg.style.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`
     previewImg.style.filter = `brightness(${brightness}%) saturate(${saturation}%) invert(${inversion}%) grayscale(${grayscale}%)`;
 }
 const loadImg = () => {
-    let file = fileInput.files[0]; /* Users file input */
-    // console.log(file)
-    if (!file) return;
-    previewImg.src = URL.createObjectURL(file);
-    previewImg.addEventListener("load", () => {
-        document.querySelector(".container").classList.remove("disable");
-    })
+    const loadingImg = () => {
+        let file = fileInput.files[0]; /* Users file input */
+        // console.log(file)
+        if (!file) return;
+        previewImg.src = URL.createObjectURL(file);
+        previewImg.addEventListener("load", () => {
+            document.querySelector(".container").classList.remove("disable");
+            resetFilters();
+            filterOptions[0].click();  // by deafult brightness button will clicked...
+            applyFilter();
+            savedImage = false;
+        })
+    }
+    if (savedImage) {
+        loadingImg();
+    } else {
+        let ansConfirm = confirm("Image isn't saved properly. Do you want to continue to load new Image??")
+        if(ansConfirm){
+            loadingImg();
+        }else return
+    }
 }
 filterOptions.forEach(option => {
     option.addEventListener("click", () => {
@@ -89,6 +104,7 @@ const resetFilters = () => {
 }
 
 const saveImage = () => {
+    savedImage = true;
     const canvas = document.createElement("canvas"); // created canvas element
     const ctx = canvas.getContext("2d"); // for drawing context to canvas
     canvas.width = previewImg.naturalWidth;
@@ -108,7 +124,7 @@ const saveImage = () => {
     link.href = canvas.toDataURL();
     link.click();
 }
-fileInput.addEventListener("change", loadImg);
+fileInput.addEventListener("change",loadImg);
 chooseImg.addEventListener("click", () => fileInput.click());
 saveImg.addEventListener("click", saveImage)
 resetFilterBtn.addEventListener("click", resetFilters);

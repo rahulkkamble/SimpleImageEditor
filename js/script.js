@@ -1,6 +1,8 @@
 // Lets begin
 const fileInput = document.querySelector(".file-input"),
-    filterOptions = document.querySelectorAll(".filter button"),
+    filterOptions = document.querySelectorAll(".filter .options button"),
+    sizeOptions = document.querySelectorAll(".size .size-options button"),
+    sizeName = document.querySelector(".label-preview-img"),
     filterInfoName = document.querySelector(".filter-info .name"),
     filterSlider = document.querySelector(".slider input"),
     filterValue = document.querySelector(".filter-info .value"),
@@ -13,6 +15,11 @@ const fileInput = document.querySelector(".file-input"),
 let brightness = 100, saturation = 100, inversion = 0, grayscale = 0;
 let rotate = 0, flipHorizontal = 1, flipVertical = 1;
 let savedImage = true;
+var passport = null, a4 = null, f4by6 = null, regular = true;
+const canvas = document.createElement("canvas"); // created canvas element
+let ctx = canvas.getContext("2d");
+const passWidth = 250, passHeight = 320;
+var loadedFileName = undefined;
 
 const applyFilter = () => {
     previewImg.style.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`
@@ -22,6 +29,8 @@ const loadImg = () => {
     const loadingImg = () => {
         let file = fileInput.files[0]; /* Users file input */
         // console.log(file)
+        loadedFileName = fileInput.files[0].name;
+        // console.log(loadedFileName)
         if (!file) return;
         previewImg.src = URL.createObjectURL(file);
         previewImg.addEventListener("load", () => {
@@ -36,9 +45,9 @@ const loadImg = () => {
         loadingImg();
     } else {
         let ansConfirm = confirm("Image isn't saved properly. Do you want to continue to load new Image??")
-        if(ansConfirm){
+        if (ansConfirm) {
             loadingImg();
-        }else return
+        } else return
     }
 }
 filterOptions.forEach(option => {
@@ -62,6 +71,26 @@ filterOptions.forEach(option => {
             filterSlider.max = "100"
             filterSlider.value = grayscale;
             filterValue.innerText = `${grayscale}%`
+        }
+    })
+})
+
+sizeOptions.forEach(option => {
+    option.addEventListener("click", () => {
+        document.querySelector(".size-options .active").classList.remove("active");
+        option.classList.add("active")
+        if (option.id === "passport") {
+            passport = true, f4by6 = false, a4 = false, regular = false;
+            sizeName.innerText = `${option.innerText} is selected`;
+        } else if (option.id === "4by6") {
+            f4by6 = true, passport = false, a4 = false, regular = false;
+            sizeName.innerText = `${option.innerText} is selected`;
+        } else if (option.id === "a4") {
+            a4 = true, passport = false, f4by6 = false, regular = false;
+            sizeName.innerText = `${option.innerText} is selected`;
+        } else {
+            regular = true, passport = false, f4by6 = false, a4 = false;
+            sizeName.innerText = `${option.innerText} is selected`;
         }
     })
 })
@@ -105,26 +134,54 @@ const resetFilters = () => {
 
 const saveImage = () => {
     savedImage = true;
-    const canvas = document.createElement("canvas"); // created canvas element
-    const ctx = canvas.getContext("2d"); // for drawing context to canvas
-    canvas.width = previewImg.naturalWidth;
-    canvas.height = previewImg.naturalHeight;
+    const createCanvas = () => {
+        // for drawing context to canvas
+        let imageName = undefined;
+        if (regular) {
+            console.log("yes regular detected")
+            imageName = `regular`;
+            canvas.width = previewImg.naturalWidth;
+            canvas.height = previewImg.naturalHeight;
+            regular = false;
+        } else if (passport) {
+            console.log("yes passport detected")
+            imageName = `passport`;
+            canvas.width = passWidth;
+            canvas.height = passHeight;
+            passport = false;
+        } else if (f4by6) {
+            console.log("yes 4 X 6 is detected")
+            imageName = `4 X 6`;
+            canvas.width = 500;
+            canvas.height = 750;
+            f4by6 = false;
+        } else if (a4) {
+            console.log("a4 is detected")
+            imageName = `A4`;
+            canvas.width = 1240;
+            canvas.height = 1754;
+            a4 = false;
+        }
 
-    ctx.filter = `brightness(${brightness}%) saturate(${saturation}%) invert(${inversion}%) grayscale(${grayscale}%)`;
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    if (rotate !== 0) {
-        ctx.rotate(rotate * Math.PI / 180);
+        ctx.filter = `brightness(${brightness}%) saturate(${saturation}%) invert(${inversion}%) grayscale(${grayscale}%)`;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        if (rotate !== 0) {
+            ctx.rotate(rotate * Math.PI / 180);
+        }
+        ctx.scale(flipHorizontal, flipVertical)
+        // ctx.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`  This isn't working...
+        ctx.drawImage(previewImg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+        // document.body.appendChild(canvas);
+        const link = document.createElement("a");
+        link.download = `Edited-${imageName}-size-${canvas.width}X${canvas.height}-${loadedFileName}`;
+        link.href = canvas.toDataURL();
+        link.click();
+        passport = null, a4 = null, f4by6 = null, regular = null;
     }
-    ctx.scale(flipHorizontal, flipVertical)
-    // ctx.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`  This isn't working...
-    ctx.drawImage(previewImg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-    // document.body.appendChild(canvas);
-    const link = document.createElement("a");
-    link.download = "Edited-Image";
-    link.href = canvas.toDataURL();
-    link.click();
+    createCanvas();
+
 }
-fileInput.addEventListener("change",loadImg);
+fileInput.addEventListener("change", loadImg);
 chooseImg.addEventListener("click", () => fileInput.click());
 saveImg.addEventListener("click", saveImage)
 resetFilterBtn.addEventListener("click", resetFilters);

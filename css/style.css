@@ -27,6 +27,12 @@ body {
     opacity: 0.6;
     pointer-events: none;
 }
+.container.disable :where(.label-preview-img){
+    display: none;
+}
+.container.disable :where(.label-preview-img){
+    display: none;
+}
 
 .container h2 {
     font-size: 22px;
@@ -78,6 +84,18 @@ body {
     width: calc(100% / 2 - 4px);
 }
 
+.size-options{
+    margin-top: 10px;
+}
+.editor-panel .size button {
+    width: calc(100% / 2 - 4px);
+}
+.size button.active {
+    color: #fff;
+    background: #5372f0;
+    border: #5372f0;
+}
+
 .filter button.active {
     color: #fff;
     background: #5372f0;
@@ -118,12 +136,17 @@ body {
 .wraper .preview-img {
     flex-grow: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-left: 20px;
     overflow: hidden;
     /* min-width: 335px; */
     /* max-height: 350px; */
+}
+.preview-img .label-preview-img{
+    margin-top: 10px;
+    font-weight: 500;
 }
 
 .preview-img img {
@@ -132,6 +155,7 @@ body {
     min-height: 335px;
     width: 100%;
     height: 100%;
+    /* margin-top: 30px; */
     object-fit: contain;
 }
 
@@ -181,9 +205,14 @@ body {
 }
 
 @media screen and (max-width: 500px) {
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
     .controls button {
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
 
     .controls .row {
@@ -197,17 +226,20 @@ body {
     .container {
         position: relative;
         min-height: 110vh;
+        padding-top: 5px;
         display: flex;
         flex-direction: column;
     }
 
     .container h2 {
         margin: 0 auto;
+        padding: 5px 0;
+        font-size: small;
     }
 
     .container .wraper {
         position: relative;
-        top: 60px;
+        top: 50px;
         /* margin-top: 10px; */
     }
 
@@ -219,7 +251,7 @@ body {
         width: -webkit-fill-available;
         margin-left: 80px;
         margin-right: 80px;
-        margin-top: 80px;
+        margin-top: 50px;
         min-width: min-content;
     }
 

@@ -16,8 +16,7 @@ let brightness = 100, saturation = 100, inversion = 0, grayscale = 0;
 let rotate = 0, flipHorizontal = 1, flipVertical = 1;
 let savedImage = true;
 var passport = null, a4 = null, f4by6 = null, regular = true;
-const canvas = document.createElement("canvas"); // created canvas element
-let ctx = canvas.getContext("2d");
+
 const passWidth = 250, passHeight = 320;
 var loadedFileName = undefined;
 
@@ -29,7 +28,8 @@ const loadImg = () => {
     const loadingImg = () => {
         let file = fileInput.files[0]; /* Users file input */
         // console.log(file)
-        loadedFileName = fileInput.files[0].name;
+        loadedFileName = file.name;
+
         // console.log(loadedFileName)
         if (!file) return;
         previewImg.src = URL.createObjectURL(file);
@@ -50,6 +50,7 @@ const loadImg = () => {
         } else return
     }
 }
+
 filterOptions.forEach(option => {
     option.addEventListener("click", () => {
         document.querySelector(".filter .active").classList.remove("active");
@@ -81,16 +82,17 @@ sizeOptions.forEach(option => {
         option.classList.add("active")
         if (option.id === "passport") {
             passport = true, f4by6 = false, a4 = false, regular = false;
-            sizeName.innerText = `${option.innerText} is selected`;
+            sizeName.innerText = `Passport size is selected`;
+
         } else if (option.id === "4by6") {
             f4by6 = true, passport = false, a4 = false, regular = false;
-            sizeName.innerText = `${option.innerText} is selected`;
+            sizeName.innerText = `4X6 inch size is selected`;
         } else if (option.id === "a4") {
             a4 = true, passport = false, f4by6 = false, regular = false;
-            sizeName.innerText = `${option.innerText} is selected`;
+            sizeName.innerText = `A4 size is selected`;
         } else {
             regular = true, passport = false, f4by6 = false, a4 = false;
-            sizeName.innerText = `${option.innerText} is selected`;
+            sizeName.innerText = `Original size is = ${previewImg.width}X${previewImg.height}`;
         }
     })
 })
@@ -134,20 +136,25 @@ const resetFilters = () => {
 
 const saveImage = () => {
     savedImage = true;
+    const canvas = document.createElement("canvas"); // created canvas element
+    let ctx = canvas.getContext("2d");
+    let imgWidth = previewImg.naturalWidth;
+    let imgHeight = previewImg.naturalHeight;
+    let imgRatio = imgWidth / imgHeight;
     const createCanvas = () => {
         // for drawing context to canvas
         let imageName = undefined;
         if (regular) {
             console.log("yes regular detected")
-            imageName = `regular`;
-            canvas.width = previewImg.naturalWidth;
-            canvas.height = previewImg.naturalHeight;
+            imageName = `original`;
+            canvas.width = imgWidth;
+            canvas.height = imgHeight;
             regular = false;
         } else if (passport) {
             console.log("yes passport detected")
             imageName = `passport`;
             canvas.width = passWidth;
-            canvas.height = passHeight;
+            canvas.height = passWidth / imgRatio;
             passport = false;
         } else if (f4by6) {
             console.log("yes 4 X 6 is detected")
@@ -169,13 +176,18 @@ const saveImage = () => {
             ctx.rotate(rotate * Math.PI / 180);
         }
         ctx.scale(flipHorizontal, flipVertical)
+        // ctx.style.objectFit = "cover";
+        // canvas.style.objectFit = "cover";
         // ctx.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`  This isn't working...
         ctx.drawImage(previewImg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-        // document.body.appendChild(canvas);
+        document.body.appendChild(canvas);
+        canvas.setAttribute("style", "object-fit: cover;");
+        // ctx.setAttribute("style", "object-fit: cover;");
+        console.log(canvas.classList)
         const link = document.createElement("a");
         link.download = `Edited-${imageName}-size-${canvas.width}X${canvas.height}-${loadedFileName}`;
         link.href = canvas.toDataURL();
-        link.click();
+        // link.click();
         passport = null, a4 = null, f4by6 = null, regular = null;
     }
     createCanvas();

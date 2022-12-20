@@ -180,14 +180,14 @@ const saveImage = () => {
         // canvas.style.objectFit = "cover";
         // ctx.transform = `rotate(${rotate}deg) scale(${flipHorizontal}, ${flipVertical})`  This isn't working...
         ctx.drawImage(previewImg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-        document.body.appendChild(canvas);
+        // document.body.appendChild(canvas);
         canvas.setAttribute("style", "object-fit: cover;");
         // ctx.setAttribute("style", "object-fit: cover;");
         console.log(canvas.classList)
         const link = document.createElement("a");
         link.download = `Edited-${imageName}-size-${canvas.width}X${canvas.height}-${loadedFileName}`;
         link.href = canvas.toDataURL();
-        // link.click();
+        link.click();
         passport = null, a4 = null, f4by6 = null, regular = null;
     }
     createCanvas();
